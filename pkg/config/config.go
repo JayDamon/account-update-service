@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jaydamon/moneymakergocloak"
 	"github.com/jaydamon/moneymakerplaid"
+	"github.com/jaydamon/moneymakerrabbit"
 	"github.com/joho/godotenv"
 	"os"
 )
@@ -13,7 +14,7 @@ type Config struct {
 	ApplicationName string
 	KeyCloakConfig  *moneymakergocloak.Configuration
 	Plaid           *moneymakerplaid.Configuration
-	Rabbit          *Configuration
+	Rabbit          *moneymakerrabbit.Configuration
 }
 
 func GetConfig() *Config {
@@ -29,9 +30,9 @@ func GetConfig() *Config {
 	config := &Config{
 		HostPort:        hostPort,
 		ApplicationName: applicationName,
-		//KeyCloakConfig: moneymakergocloak.NewConfiguration(),
-		//Plaid:          moneymakerplaid.NewConfiguration(),
-		Rabbit: NewConfiguration(),
+		KeyCloakConfig:  moneymakergocloak.NewConfiguration(),
+		Plaid:           moneymakerplaid.NewConfiguration(),
+		Rabbit:          moneymakerrabbit.NewConfiguration(),
 	}
 
 	return config

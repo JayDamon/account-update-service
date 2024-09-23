@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/factotum/moneymaker/account-update-service/pkg/config"
 	"github.com/go-chi/chi/v5"
-	"github.com/rabbitmq/amqp091-go"
+	"github.com/jaydamon/moneymakerrabbit"
 	"log"
 	"net/http"
 )
@@ -12,8 +12,7 @@ import (
 type App struct {
 	Router           *chi.Mux
 	Server           *http.Server
-	RabbitConnection *config.Connection
-	RabbitChannel    *amqp091.Channel
+	RabbitConnection moneymakerrabbit.Connector
 	Config           *config.Config
 }
 
