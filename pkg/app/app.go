@@ -12,7 +12,7 @@ import (
 type App struct {
 	Router           *chi.Mux
 	Server           *http.Server
-	RabbitConnection *moneymakerrabbit.Connection
+	RabbitConnection moneymakerrabbit.Connector
 	Config           *config.Config
 }
 

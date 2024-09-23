@@ -4,13 +4,14 @@ import (
 	"github.com/plaid/plaid-go/plaid"
 )
 
-func convertAccountResponseToAccountList(accountUpdates *plaid.AccountsGetResponse) *[]Account {
+func convertAccountResponseToAccountList(accountUpdates *plaid.AccountsGetResponse, itemId *string, userId *string) *[]Account {
 
 	accounts := make([]Account, len(accountUpdates.Accounts))
 
 	for i, a := range accountUpdates.Accounts {
 		account := convertAccountBaseToAccount(&a)
-		account.ItemId = &accountUpdates.Item.ItemId
+		account.ItemId = itemId
+		account.TenantId = userId
 		accounts[i] = *account
 	}
 
