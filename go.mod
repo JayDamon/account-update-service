@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0
-	github.com/jaydamon/moneymakergocloak v0.0.0-20230916210526-12136784735d
-	github.com/jaydamon/moneymakerplaid v0.0.0-20230221115648-a8aa3efc6a1c
-	github.com/jaydamon/moneymakerrabbit v0.0.0-20231018224209-6a93251ce145
+	github.com/jaydamon/moneymakergocloak v0.0.0-20240923120148-885403db864d
+	github.com/jaydamon/moneymakerplaid v0.0.0-20240923120430-c50a1c52d927
+	github.com/jaydamon/moneymakerrabbit v0.0.0-20240923120612-407cd501f499
 	github.com/joho/godotenv v1.5.1
 	github.com/plaid/plaid-go v1.10.0
 	github.com/rabbitmq/amqp091-go v1.10.0
@@ -26,9 +26,3 @@ require (
 	golang.org/x/oauth2 v0.23.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/jaydamon/moneymakergocloak => ../moneymakergocloak
-
-replace github.com/jaydamon/moneymakerplaid => ../moneymakerplaid
-
-replace github.com/jaydamon/moneymakerrabbit => ../moneymakerrabbit
