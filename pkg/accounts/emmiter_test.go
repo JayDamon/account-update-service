@@ -3,6 +3,7 @@ package accounts
 import (
 	"fmt"
 	"github.com/jaydamon/moneymakerrabbit"
+	"github.com/rabbitmq/amqp091-go"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -115,3 +116,7 @@ func (conn *TestConnector) SendMessage(body interface{}, headers map[string]inte
 func (conn *TestConnector) Close() {}
 
 func (conn *TestConnector) DeclareExchange(exchangeName string) {}
+
+func (conn *TestConnector) DeclareQueue(queueName string) *amqp091.Queue {
+	return nil
+}
