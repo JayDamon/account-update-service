@@ -3,14 +3,12 @@ package app
 import (
 	"fmt"
 	"github.com/factotum/moneymaker/account-update-service/pkg/config"
-	"github.com/go-chi/chi/v5"
 	"github.com/jaydamon/moneymakerrabbit"
 	"log"
 	"net/http"
 )
 
 type App struct {
-	Router           *chi.Mux
 	Server           *http.Server
 	RabbitConnection moneymakerrabbit.Connector
 	Config           *config.Config

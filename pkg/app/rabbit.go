@@ -11,9 +11,11 @@ func (a *App) InitializeRabbitReceivers() {
 
 	a.RabbitConnection.DeclareExchange("account_update")
 
-	plaidHandler := a.Config.Plaid.NewPlaidHandler()
-
+	plaidApi := accounts.NewApiService(a.Config.Plaid.Config)
 	go a.RabbitConnection.ReceiveMessages(
 		"account_refresh",
-		accounts.NewHandler(a.RabbitConnection, goCloakMiddleWare, plaidHandler, a.Config).HandleAccountRefreshEvent)
+		accounts.NewHandler(
+			a.RabbitConnection,
+			goCloakMiddleWare,
+			plaidApi).HandleAccountUpdateEvent)
 }

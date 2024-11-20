@@ -12,8 +12,9 @@ func TestConvertAccountResponseToAccountList(t *testing.T) {
 
 	itemId := "itemId"
 	tenantId := "tenantId"
+	isNew := true
 
-	accounts := convertAccountResponseToAccountList(authGetResponse, &itemId, &tenantId)
+	accounts := convertAccountResponseToAccountList(authGetResponse, &itemId, &tenantId, &isNew)
 
 	assert.NotEmpty(t, accounts, "Accounts array should not be nil or empty")
 	assert.Len(t, *accounts, 2, "Accounts array should have 2 accounts, but was %n", len(*accounts))
@@ -24,6 +25,7 @@ func TestConvertAccountResponseToAccountList(t *testing.T) {
 		assert.NotNil(t, a.ItemId)
 		assert.Equal(t, *a.ItemId, "itemId")
 		assert.Equal(t, *a.TenantId, "tenantId")
+		assert.True(t, *a.IsNew)
 		count++
 	}
 
