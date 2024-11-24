@@ -3,7 +3,7 @@ module github.com/factotum/moneymaker/account-update-service
 go 1.20
 
 require (
-	github.com/jaydamon/moneymakergocloak v0.0.0-20241123032700-1b410e5963a0
+	github.com/jaydamon/moneymakergocloak v0.0.0-20241124144423-22e640e44b0b
 	github.com/jaydamon/moneymakerplaid v0.0.0-20241121141910-9093640086d7
 	github.com/jaydamon/moneymakerrabbit v0.0.0-20241124135451-fe7a747f60ab
 	github.com/joho/godotenv v1.5.1

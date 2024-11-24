@@ -104,8 +104,8 @@ github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5m
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
-github.com/jaydamon/moneymakergocloak v0.0.0-20241123032700-1b410e5963a0 h1:KvHjGuQ8ZLMLZGY8cL5mJ+eu1NoJS46wcEvz8tfdTyw=
-github.com/jaydamon/moneymakergocloak v0.0.0-20241123032700-1b410e5963a0/go.mod h1:x6b+ExvryOJLa1TZJAKPQexYH9d3J9E5FimhEDe51jA=
+github.com/jaydamon/moneymakergocloak v0.0.0-20241124144423-22e640e44b0b h1:e7d5sLj9uXZ/2CH6Fgdmt5MsS+PZ+rgrqDhtFFuaAR4=
+github.com/jaydamon/moneymakergocloak v0.0.0-20241124144423-22e640e44b0b/go.mod h1:x6b+ExvryOJLa1TZJAKPQexYH9d3J9E5FimhEDe51jA=
 github.com/jaydamon/moneymakerplaid v0.0.0-20241121141910-9093640086d7 h1:LKDZBBecr2qKURJxb32Vc/PxefO80rpbTEmiih2eWgg=
 github.com/jaydamon/moneymakerplaid v0.0.0-20241121141910-9093640086d7/go.mod h1:TvBaoJtz5XQQAXqsD5cITqycafR8EAmjg6+4aktYd2s=
 github.com/jaydamon/moneymakerrabbit v0.0.0-20241124135451-fe7a747f60ab h1:VArW4q2zDq4t91j6idEn+GgI2s3BF2IwVetVCAZY5pU=
