@@ -19,7 +19,7 @@ type AccountHandler struct {
 }
 
 type Handler interface {
-	HandleAccountUpdateEvent(msg *amqp091.Delivery)
+	HandleAccountUpdateEvent(msg *amqp091.Delivery) error
 }
 
 func NewHandler(
@@ -33,27 +33,24 @@ func NewHandler(
 	}
 }
 
-func (handler *AccountHandler) HandleAccountUpdateEvent(msg *amqp091.Delivery) {
+func (handler *AccountHandler) HandleAccountUpdateEvent(msg *amqp091.Delivery) error {
 
 	log.Println("Received Message from account-refresh queue")
 
 	err := handler.goCloakMiddleWare.AuthorizeMessage(msg)
 	if err != nil {
 		fmt.Printf("unauthorized message. %s\n", err)
-		// TODO: Send to DLQ
-		return
+		return err
 	}
 	token, err := moneymakergocloak.GetAuthorizationHeaderFromMessage(msg)
 	if err != nil {
 		fmt.Printf("error when extracting token from request. %s\n", err)
-		// TODO: Send to DLQ
-		return
+		return err
 	}
 	userId, err := handler.goCloakMiddleWare.ExtractUserIdFromToken(&token)
 	if err != nil {
 		fmt.Printf("error extracting user id from jwt token. %s\n", err)
-		// TODO: Send to DLQ
-		return
+		return err
 	}
 	fmt.Println("successfully authorized message")
 
@@ -62,23 +59,20 @@ func (handler *AccountHandler) HandleAccountUpdateEvent(msg *amqp091.Delivery) {
 	err = json.Unmarshal(msg.Body, &privateToken)
 	if err != nil {
 		log.Printf("Unable to unmarshal body to Private Token object \n%s\n", msg.Body)
-		// TODO: Send to DLQ
-		return
+		return err
 	}
 	log.Printf("Unmarshalled message body to Private Token object %+v\n", privateToken)
 
 	if userId != *privateToken.UserId {
 		log.Printf("invalid private token. user id does not match oauth token")
-		// TODO: Send to DLQ
-		return
+		return err
 	}
 	ctx := context.Background()
 	accountsGetRequest := *plaid.NewAccountsGetRequest(*privateToken.PrivateToken)
 	accounts, _, err := handler.plaidApi.GetAccountsForItem(ctx, &accountsGetRequest)
 	if err != nil {
 		log.Printf("Unable to retrieve accounts details \n%s\n", err)
-		// TODO: Send to DLQ
-		return
+		return err
 	}
 	// TODO: If account is existing, get balances for them
 
@@ -86,7 +80,7 @@ func (handler *AccountHandler) HandleAccountUpdateEvent(msg *amqp091.Delivery) {
 	err = emitAccountUpdates(handler.rabbitConnection, &accounts, privateToken.Cursor, &token, &privateToken)
 	if err != nil {
 		log.Printf("Unable to send all account updates \n%s\n", err)
-		// TODO: Send to DLQ
-		return
+		return err
 	}
+	return nil
 }

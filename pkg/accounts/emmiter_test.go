@@ -149,7 +149,7 @@ func (conn *TestConnector) DeclareQueue(queueName string) *amqp091.Queue {
 	return nil
 }
 
-func (conn *TestConnector) ReceiveMessagesFromExchange(exchangeName string, handler moneymakerrabbit.MessageHandlerFunc) {
+func (conn *TestConnector) ReceiveMessagesFromExchange(exchangeName string, consumingQueueName string, handler moneymakerrabbit.MessageHandlerFunc) {
 }
 
 type TestApiService struct {
