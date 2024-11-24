@@ -74,7 +74,21 @@ func (handler *AccountHandler) HandleAccountUpdateEvent(msg *amqp091.Delivery) e
 		log.Printf("Unable to retrieve accounts details \n%s\n", err)
 		return err
 	}
-	// TODO: If account is existing, get balances for them
+
+	if !*privateToken.IsNew {
+		balancesGetReq := plaid.NewAccountsBalanceGetRequest(*privateToken.PrivateToken)
+		balancesGetResp, _, err := handler.plaidApi.GetAccountBalancesForItem(ctx, balancesGetReq)
+		if err != nil {
+			log.Printf("Unable to retrieve account balances \n%s\n", err)
+		}
+		var bb map[string]plaid.AccountBase
+		for _, b := range balancesGetResp.Accounts {
+			bb[b.AccountId] = b
+		}
+		for _, a := range accounts.Accounts {
+			a.Balances = bb[a.AccountId].Balances
+		}
+	}
 
 	log.Printf("Found accounts. Emitting to Account Update Queue. \n%+v\n", accounts)
 	err = emitAccountUpdates(handler.rabbitConnection, &accounts, privateToken.Cursor, &token, &privateToken)

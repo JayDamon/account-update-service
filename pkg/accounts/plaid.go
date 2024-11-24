@@ -12,6 +12,7 @@ type PlaidAccountApi struct {
 
 type ApiService interface {
 	GetAccountsForItem(ctx context.Context, accountsGetRequest *plaid.AccountsGetRequest) (plaid.AccountsGetResponse, *http.Response, error)
+	GetAccountBalancesForItem(ctx context.Context, accountBalancesGetReq *plaid.AccountsBalanceGetRequest) (plaid.AccountsGetResponse, *http.Response, error)
 }
 
 func (api *PlaidAccountApi) GetAccountsForItem(
@@ -19,6 +20,10 @@ func (api *PlaidAccountApi) GetAccountsForItem(
 	accountsGetRequest *plaid.AccountsGetRequest,
 ) (plaid.AccountsGetResponse, *http.Response, error) {
 	return api.plaidApi.AccountsGet(ctx).AccountsGetRequest(*accountsGetRequest).Execute()
+}
+
+func (api *PlaidAccountApi) GetAccountBalancesForItem(ctx context.Context, accountBalancesGetReq *plaid.AccountsBalanceGetRequest) (plaid.AccountsGetResponse, *http.Response, error) {
+	return api.plaidApi.AccountsBalanceGet(ctx).AccountsBalanceGetRequest(*accountBalancesGetReq).Execute()
 }
 
 func NewApiService(config *plaid.Configuration) ApiService {
