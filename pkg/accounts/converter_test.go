@@ -19,17 +19,26 @@ func TestConvertAccountResponseToAccountList(t *testing.T) {
 	assert.NotEmpty(t, accounts, "Accounts array should not be nil or empty")
 	assert.Len(t, *accounts, 2, "Accounts array should have 2 accounts, but was %n", len(*accounts))
 
-	count := 0
+	accountOneCounted := false
+	accountTwoCounted := false
 
 	for _, a := range *accounts {
 		assert.NotNil(t, a.ItemId)
 		assert.Equal(t, *a.ItemId, "itemId")
 		assert.Equal(t, *a.TenantId, "tenantId")
 		assert.True(t, *a.IsNew)
-		count++
+		if *a.AccountId == "accountOne" {
+			assert.Equal(t, *a.Name, "testName")
+			accountOneCounted = true
+		} else {
+			assert.Equal(t, *a.AccountId, "accountTwo")
+			assert.Equal(t, *a.Name, "testNameTwo")
+			accountTwoCounted = true
+		}
 	}
 
-	assert.Equal(t, 2, count)
+	assert.True(t, accountOneCounted, "AccountOneCounted should be true")
+	assert.True(t, accountTwoCounted, "AccountTwoCounted should be true")
 }
 
 func TestConvertAccountBaseToAccount_HappyPath(t *testing.T) {
@@ -45,7 +54,7 @@ func TestConvertAccountBaseToAccount_HappyPath(t *testing.T) {
 
 	accountBase := createSimpleAccountBase(testName, officialName, available, current, limit, accType, accSubType)
 
-	account := convertAccountBaseToAccount(accountBase)
+	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
 	assert.Equal(t, testId, *account.AccountId)
@@ -83,7 +92,7 @@ func TestConvertAccountBaseToAccount_NilOfficialName(t *testing.T) {
 		*plaid.NewNullableAccountSubtype(&accSubType),
 	)
 
-	account := convertAccountBaseToAccount(accountBase)
+	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
 	assert.Equal(t, testId, *account.AccountId)
@@ -120,7 +129,7 @@ func TestConvertAccountBaseToAccount_NilAvailableBalance(t *testing.T) {
 		*plaid.NewNullableAccountSubtype(&accSubType),
 	)
 
-	account := convertAccountBaseToAccount(accountBase)
+	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
 	assert.Equal(t, testId, *account.AccountId)
@@ -157,7 +166,7 @@ func TestConvertAccountBaseToAccount_NilCurrentBalance(t *testing.T) {
 		*plaid.NewNullableAccountSubtype(&accSubType),
 	)
 
-	account := convertAccountBaseToAccount(accountBase)
+	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
 	assert.Equal(t, testId, *account.AccountId)
@@ -194,7 +203,7 @@ func TestConvertAccountBaseToAccount_NilLimit(t *testing.T) {
 		*plaid.NewNullableAccountSubtype(&accSubType),
 	)
 
-	account := convertAccountBaseToAccount(accountBase)
+	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
 	assert.Equal(t, testId, *account.AccountId)
@@ -231,7 +240,7 @@ func TestConvertAccountBaseToAccount_NilAccountSubType(t *testing.T) {
 		*plaid.NewNullableAccountSubtype(nil),
 	)
 
-	account := convertAccountBaseToAccount(accountBase)
+	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
 	assert.Equal(t, testId, *account.AccountId)
@@ -250,8 +259,8 @@ func createTestAccountsGetResponse() *plaid.AccountsGetResponse {
 	accountBalance := createAccountBalance(22.3, 33.1, 100.0, "USD")
 	accountBalanceTwo := createAccountBalance(22.3, 33.1, 100.0, "USD")
 
-	accountOne401A := createAccountBase(accountBalance, "0000", "testName", "testName", plaid.ACCOUNTTYPE_INVESTMENT, plaid.ACCOUNTSUBTYPE__401A)
-	account401K := createAccountBase(accountBalanceTwo, "0000", "testNameTwo", "testNameTwo", plaid.ACCOUNTTYPE_INVESTMENT, plaid.ACCOUNTSUBTYPE__401K)
+	accountOne401A := createAccountBase("accountOne", "testName", accountBalance, "0000", "testName", plaid.ACCOUNTTYPE_INVESTMENT, plaid.ACCOUNTSUBTYPE__401A)
+	account401K := createAccountBase("accountTwo", "testNameTwo", accountBalanceTwo, "0000", "testNameTwo", plaid.ACCOUNTTYPE_INVESTMENT, plaid.ACCOUNTSUBTYPE__401K)
 
 	accounts := []plaid.AccountBase{
 		*accountOne401A,
@@ -276,7 +285,7 @@ func createSimpleAccountBase(
 	accType plaid.AccountType,
 	subType plaid.AccountSubtype) *plaid.AccountBase {
 	balance := createAccountBalance(float32(available), float32(current), float32(limit), "USD")
-	accountBase := createAccountBase(balance, "0000", name, officialName, accType, subType)
+	accountBase := createAccountBase("accountOne", name, balance, "0000", officialName, accType, subType)
 	return accountBase
 }
 
@@ -320,15 +329,10 @@ func createAccountBalance(available float32, current float32, limit float32, cur
 	return accountBalance
 }
 
-func createAccountBase(
-	accountBalance *plaid.AccountBalance,
-	mask string, accountName string,
-	officialName string,
-	accType plaid.AccountType,
-	subType plaid.AccountSubtype) *plaid.AccountBase {
+func createAccountBase(accountId string, accountName string, accountBalance *plaid.AccountBalance, mask string, officialName string, accType plaid.AccountType, subType plaid.AccountSubtype) *plaid.AccountBase {
 
 	accountOne := plaid.NewAccountBase(
-		"accountId",
+		accountId,
 		*accountBalance,
 		*plaid.NewNullableString(&mask),
 		accountName,

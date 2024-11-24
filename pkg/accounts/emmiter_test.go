@@ -163,3 +163,8 @@ func (api *TestApiService) GetAccountsForItem(ctx context.Context, accountsGetRe
 	api.getAccountsForItemCount++
 	return response, nil, nil
 }
+
+func (api *TestApiService) GetAccountBalancesForItem(ctx context.Context, accountBalancesGetReq *plaid.AccountsBalanceGetRequest) (plaid.AccountsGetResponse, *http.Response, error) {
+	response := plaid.AccountsGetResponse{}
+	return response, nil, nil
+}

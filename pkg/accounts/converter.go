@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"github.com/plaid/plaid-go/plaid"
+	"log"
 )
 
 func convertAccountResponseToAccountList(
@@ -12,20 +13,22 @@ func convertAccountResponseToAccountList(
 
 	accounts := make([]Account, len(accountUpdates.Accounts))
 
-	for i, a := range accountUpdates.Accounts {
-		account := convertAccountBaseToAccount(&a)
+	au := *accountUpdates
+
+	for i, a := range au.Accounts {
+		log.Printf("Converting account\n    %+v", a)
+		account := convertAccountBaseToAccount(a)
 		account.ItemId = itemId
 		account.TenantId = userId
 		account.IsNew = isNew
-		accounts[i] = *account
+		accounts[i] = account
+		log.Printf("Account converted\n    %+v", &accounts[i])
 	}
 
 	return &accounts
 }
 
-func convertAccountBaseToAccount(accountBase *plaid.AccountBase) *Account {
-
-	accType := &accountBase.Type
+func convertAccountBaseToAccount(accountBase plaid.AccountBase) Account {
 
 	account := Account{}
 	account.AccountId = &accountBase.AccountId
@@ -34,8 +37,8 @@ func convertAccountBaseToAccount(accountBase *plaid.AccountBase) *Account {
 	account.AvailableBalance = accountBase.Balances.Available.Get()
 	account.CurrentBalance = accountBase.Balances.Current.Get()
 	account.Limit = accountBase.Balances.Limit.Get()
-	account.AccountType = accType
+	account.AccountType = &accountBase.Type
 	account.AccountSubType = accountBase.Subtype.Get()
 
-	return &account
+	return account
 }
