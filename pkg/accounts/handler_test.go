@@ -13,21 +13,23 @@ func TestHandleAccountRefreshEvent_SuccessPath(t *testing.T) {
 
 	conn := &TestConnector{}
 	mid := &TestMiddleware{}
-	plaidHandler := &TestPlaidHandler{}
-	plaidHandler.response = createTestAccountsGetResponse()
+	mid.extractUserIdFromTokenReturn = "userId"
+	plaidHandler := &TestApiService{}
+	//plaidHandler.response = createTestAccountsGetResponse()
 	handler := createTestHandler(conn, mid, plaidHandler)
 
 	msg := createTestMessage()
 
-	handler.HandleAccountRefreshEvent(msg)
+	handler.HandleAccountUpdateEvent(msg)
 
 	assert.Equal(t, 1, mid.authorizeMessagesCount)
 	assert.Equal(t, 0, mid.authorizeHttpRequestCount)
 	assert.Equal(t, 1, mid.extractUserIdFromTokenCount)
 	assert.Equal(t, 1, plaidHandler.getAccountsForItemCount)
-	assert.Equal(t, "token", plaidHandler.privateToken)
-	assert.Equal(t, 2, conn.sendMessageCount)
-	assert.Equal(t, "testToken", conn.headers[0]["Authorization"])
+	assert.Equal(t, "token", plaidHandler.request.GetAccessToken())
+	assert.Equal(t, 1, conn.sendMessageCount)
+	assert.Equal(t, "testToken", conn.headers["Authorization"])
+	assert.Equal(t, "token", conn.headers["PlaidToken"])
 }
 
 func createTestMessage() *amqp091.Delivery {
@@ -35,7 +37,7 @@ func createTestMessage() *amqp091.Delivery {
 	headers := make(map[string]interface{})
 	headers["Authorization"] = "testToken"
 
-	body := []byte("{\"id\":\"userId\",\"privateToken\":\"token\",\"itemId\":\"itemId\"}")
+	body := []byte("{\"id\":\"userId\",\"privateToken\":\"token\",\"itemId\":\"itemId\",\"isNew\":true,\"cursor\":\"testCursor\"}")
 
 	return &amqp091.Delivery{
 		nil,

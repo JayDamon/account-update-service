@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"fmt"
+	"github.com/factotum/moneymaker/account-update-service/pkg/users"
 	"github.com/jaydamon/moneymakerrabbit"
 	"github.com/plaid/plaid-go/plaid"
 	"log"
@@ -10,27 +11,30 @@ import (
 func emitAccountUpdates(
 	rabbitConnection moneymakerrabbit.Connector,
 	accountUpdates *plaid.AccountsGetResponse,
-	itemId *string,
+	cursor *string,
 	bearerToken *string,
-	userId *string) error {
+	privateToken *users.PrivateToken) error {
 
-	accounts := convertAccountResponseToAccountList(accountUpdates, itemId, userId)
+	accounts := convertAccountResponseToAccountList(
+		accountUpdates,
+		privateToken.ItemId,
+		privateToken.UserId,
+		privateToken.IsNew)
+
+	ai := AccountItem{
+		ItemId:   privateToken.ItemId,
+		Cursor:   cursor,
+		Accounts: accounts,
+	}
 
 	headers := make(map[string]interface{})
 	headers["Authorization"] = *bearerToken
+	headers["PlaidToken"] = *privateToken.PrivateToken
 
-	var errors []error
-
-	for _, a := range *accounts {
-		log.Printf("sending message to account_update exchange \n%+v", a)
-		err := rabbitConnection.SendMessage(a, headers, "application/json", "", "account_update")
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-
-	if len(errors) > 0 {
-		return fmt.Errorf("failed to send one or more messages %v\n", errors)
+	log.Printf("sending message to account_update exchange \n%+v", ai)
+	err := rabbitConnection.SendMessage(ai, headers, "application/json", "", "account_update")
+	if err != nil {
+		return fmt.Errorf("failed to send messages %v\n", err)
 	}
 
 	return nil

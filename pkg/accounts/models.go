@@ -13,6 +13,13 @@ type Account struct {
 	Limit            *float32              `json:"limit,omitempty"`
 	AccountType      *plaid.AccountType    `json:"accountType"`
 	AccountSubType   *plaid.AccountSubtype `json:"accountSubType"`
+	IsNew            *bool                 `json:"isNew"`
+}
+
+type AccountItem struct {
+	ItemId   *string    `json:"itemId"`
+	Cursor   *string    `json:"cursor"`
+	Accounts *[]Account `json:"accounts"`
 }
 
 //type Balances struct {
