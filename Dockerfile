@@ -16,5 +16,6 @@ RUN mkdir /app
 
 # COPY --from=builder /app/accountLink /app
 COPY accountUpdate /app
+COPY /db /db
 
 CMD ["/app/accountUpdate"]

@@ -27,11 +27,11 @@ func TestConvertAccountResponseToAccountList(t *testing.T) {
 		assert.Equal(t, *a.ItemId, "itemId")
 		assert.Equal(t, *a.TenantId, "tenantId")
 		assert.True(t, *a.IsNew)
-		if *a.AccountId == "accountOne" {
+		if *a.PlaidAccountId == "accountOne" {
 			assert.Equal(t, *a.Name, "testName")
 			accountOneCounted = true
 		} else {
-			assert.Equal(t, *a.AccountId, "accountTwo")
+			assert.Equal(t, *a.PlaidAccountId, "accountTwo")
 			assert.Equal(t, *a.Name, "testNameTwo")
 			accountTwoCounted = true
 		}
@@ -45,7 +45,7 @@ func TestConvertAccountBaseToAccount_HappyPath(t *testing.T) {
 
 	testName := "testName"
 	officialName := "officialName"
-	testId := "accountId"
+	testId := "accountOne"
 	available := 22.3
 	current := 31.4
 	limit := 500
@@ -57,15 +57,15 @@ func TestConvertAccountBaseToAccount_HappyPath(t *testing.T) {
 	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
-	assert.Equal(t, testId, *account.AccountId)
+	assert.Equal(t, testId, *account.PlaidAccountId)
 	assert.Equal(t, testName, *account.Name)
 	assert.Nil(t, account.ItemId)
 	assert.Equal(t, officialName, *account.OfficialName)
 	assert.Equal(t, float32(available), *account.AvailableBalance)
 	assert.Equal(t, float32(current), *account.CurrentBalance)
 	assert.Equal(t, float32(limit), *account.Limit)
-	assert.Equal(t, accType, *account.AccountType)
-	assert.Equal(t, accSubType, *account.AccountSubType)
+	assert.Equal(t, string(accType), *account.AccountTypeName)
+	assert.Equal(t, string(accSubType), *account.AccountSubTypeName)
 }
 
 func TestConvertAccountBaseToAccount_NilOfficialName(t *testing.T) {
@@ -95,15 +95,15 @@ func TestConvertAccountBaseToAccount_NilOfficialName(t *testing.T) {
 	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
-	assert.Equal(t, testId, *account.AccountId)
+	assert.Equal(t, testId, *account.PlaidAccountId)
 	assert.Equal(t, testName, *account.Name)
 	assert.Nil(t, account.ItemId)
 	assert.Nil(t, account.OfficialName)
 	assert.Equal(t, available, *account.AvailableBalance)
 	assert.Equal(t, current, *account.CurrentBalance)
 	assert.Equal(t, limit, *account.Limit)
-	assert.Equal(t, accType, *account.AccountType)
-	assert.Equal(t, accSubType, *account.AccountSubType)
+	assert.Equal(t, string(accType), *account.AccountTypeName)
+	assert.Equal(t, string(accSubType), *account.AccountSubTypeName)
 }
 
 func TestConvertAccountBaseToAccount_NilAvailableBalance(t *testing.T) {
@@ -132,15 +132,15 @@ func TestConvertAccountBaseToAccount_NilAvailableBalance(t *testing.T) {
 	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
-	assert.Equal(t, testId, *account.AccountId)
+	assert.Equal(t, testId, *account.PlaidAccountId)
 	assert.Equal(t, testName, *account.Name)
 	assert.Nil(t, account.ItemId)
 	assert.Equal(t, testName, *account.OfficialName)
 	assert.Nil(t, account.AvailableBalance)
 	assert.Equal(t, current, *account.CurrentBalance)
 	assert.Equal(t, limit, *account.Limit)
-	assert.Equal(t, accType, *account.AccountType)
-	assert.Equal(t, accSubType, *account.AccountSubType)
+	assert.Equal(t, string(accType), *account.AccountTypeName)
+	assert.Equal(t, string(accSubType), *account.AccountSubTypeName)
 }
 
 func TestConvertAccountBaseToAccount_NilCurrentBalance(t *testing.T) {
@@ -169,15 +169,15 @@ func TestConvertAccountBaseToAccount_NilCurrentBalance(t *testing.T) {
 	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
-	assert.Equal(t, testId, *account.AccountId)
+	assert.Equal(t, testId, *account.PlaidAccountId)
 	assert.Equal(t, testName, *account.Name)
 	assert.Nil(t, account.ItemId)
 	assert.Equal(t, testName, *account.OfficialName)
 	assert.Equal(t, available, *account.AvailableBalance)
 	assert.Nil(t, account.CurrentBalance)
 	assert.Equal(t, limit, *account.Limit)
-	assert.Equal(t, accType, *account.AccountType)
-	assert.Equal(t, accSubType, *account.AccountSubType)
+	assert.Equal(t, string(accType), *account.AccountTypeName)
+	assert.Equal(t, string(accSubType), *account.AccountSubTypeName)
 }
 
 func TestConvertAccountBaseToAccount_NilLimit(t *testing.T) {
@@ -206,15 +206,15 @@ func TestConvertAccountBaseToAccount_NilLimit(t *testing.T) {
 	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
-	assert.Equal(t, testId, *account.AccountId)
+	assert.Equal(t, testId, *account.PlaidAccountId)
 	assert.Equal(t, testName, *account.Name)
 	assert.Nil(t, account.ItemId)
 	assert.Equal(t, testName, *account.OfficialName)
 	assert.Equal(t, available, *account.AvailableBalance)
 	assert.Equal(t, current, *account.CurrentBalance)
 	assert.Nil(t, account.Limit)
-	assert.Equal(t, accType, *account.AccountType)
-	assert.Equal(t, accSubType, *account.AccountSubType)
+	assert.Equal(t, string(accType), *account.AccountTypeName)
+	assert.Equal(t, string(accSubType), *account.AccountSubTypeName)
 }
 
 func TestConvertAccountBaseToAccount_NilAccountSubType(t *testing.T) {
@@ -243,15 +243,15 @@ func TestConvertAccountBaseToAccount_NilAccountSubType(t *testing.T) {
 	account := convertAccountBaseToAccount(*accountBase)
 
 	assert.NotEmpty(t, account, "Account must not be nil or empty")
-	assert.Equal(t, testId, *account.AccountId)
+	assert.Equal(t, testId, *account.PlaidAccountId)
 	assert.Equal(t, testName, *account.Name)
 	assert.Nil(t, account.ItemId)
 	assert.Equal(t, testName, *account.OfficialName)
 	assert.Equal(t, available, *account.AvailableBalance)
 	assert.Equal(t, current, *account.CurrentBalance)
 	assert.Equal(t, limit, *account.Limit)
-	assert.Equal(t, accType, *account.AccountType)
-	assert.Nil(t, account.AccountSubType)
+	assert.Equal(t, string(accType), *account.AccountTypeName)
+	assert.Nil(t, account.AccountSubTypeName)
 }
 
 func createTestAccountsGetResponse() *plaid.AccountsGetResponse {

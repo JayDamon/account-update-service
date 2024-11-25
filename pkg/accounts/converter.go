@@ -30,15 +30,23 @@ func convertAccountResponseToAccountList(
 
 func convertAccountBaseToAccount(accountBase plaid.AccountBase) Account {
 
+	at := string(accountBase.GetType())
+	st := string(accountBase.GetSubtype())
+
 	account := Account{}
-	account.AccountId = &accountBase.AccountId
+	account.PlaidAccountId = &accountBase.AccountId
 	account.Name = &accountBase.Name
+	account.Mask = accountBase.Mask.Get()
 	account.OfficialName = accountBase.OfficialName.Get()
 	account.AvailableBalance = accountBase.Balances.Available.Get()
 	account.CurrentBalance = accountBase.Balances.Current.Get()
 	account.Limit = accountBase.Balances.Limit.Get()
-	account.AccountType = &accountBase.Type
-	account.AccountSubType = accountBase.Subtype.Get()
+	account.AccountTypeName = &at
+	if st == "" {
+		account.AccountSubTypeName = nil
+	} else {
+		account.AccountSubTypeName = &st
+	}
 
 	return account
 }

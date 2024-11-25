@@ -12,28 +12,32 @@ import (
 	"log"
 )
 
-type AccountHandler struct {
+type AccountReceiver struct {
+	accountRepository Repository
 	rabbitConnection  moneymakerrabbit.Connector
 	goCloakMiddleWare moneymakergocloak.Middleware
 	plaidApi          ApiService
 }
 
-type Handler interface {
+type Receiver interface {
 	HandleAccountUpdateEvent(msg *amqp091.Delivery) error
 }
 
-func NewHandler(
+func NewReceiver(
+	accountRepository Repository,
 	rabbitConnection moneymakerrabbit.Connector,
 	goCloakMiddleWare moneymakergocloak.Middleware,
-	plaidApi ApiService) Handler {
-	return &AccountHandler{
+	plaidApi ApiService) Receiver {
+
+	return &AccountReceiver{
+		accountRepository: accountRepository,
 		rabbitConnection:  rabbitConnection,
 		goCloakMiddleWare: goCloakMiddleWare,
 		plaidApi:          plaidApi,
 	}
 }
 
-func (handler *AccountHandler) HandleAccountUpdateEvent(msg *amqp091.Delivery) error {
+func (handler *AccountReceiver) HandleAccountUpdateEvent(msg *amqp091.Delivery) error {
 
 	log.Println("Received Message from account-refresh queue")
 
@@ -69,7 +73,7 @@ func (handler *AccountHandler) HandleAccountUpdateEvent(msg *amqp091.Delivery) e
 	}
 	ctx := context.Background()
 	accountsGetRequest := *plaid.NewAccountsGetRequest(*privateToken.PrivateToken)
-	accounts, _, err := handler.plaidApi.GetAccountsForItem(ctx, &accountsGetRequest)
+	accountsResponse, _, err := handler.plaidApi.GetAccountsForItem(ctx, &accountsGetRequest)
 	if err != nil {
 		log.Printf("Unable to retrieve accounts details \n%s\n", err)
 		return err
@@ -85,13 +89,52 @@ func (handler *AccountHandler) HandleAccountUpdateEvent(msg *amqp091.Delivery) e
 		for _, b := range balancesGetResp.Accounts {
 			bb[b.AccountId] = b
 		}
-		for _, a := range accounts.Accounts {
+		for _, a := range accountsResponse.Accounts {
 			a.Balances = bb[a.AccountId].Balances
 		}
 	}
 
-	log.Printf("Found accounts. Emitting to Account Update Queue. \n%+v\n", accounts)
-	err = emitAccountUpdates(handler.rabbitConnection, &accounts, privateToken.Cursor, &token, &privateToken)
+	log.Printf("Found accounts. Emitting to Account Update Queue. \n%+v\n", accountsResponse)
+	accounts := convertAccountResponseToAccountList(
+		&accountsResponse,
+		privateToken.ItemId,
+		privateToken.UserId,
+		privateToken.IsNew)
+
+	ai := AccountItem{
+		ItemId:   privateToken.ItemId,
+		TenantId: privateToken.UserId,
+		Cursor:   privateToken.Cursor,
+		Accounts: accounts,
+	}
+
+	if accountsResponse.Item.GetInstitutionId() != "" {
+		cc := []plaid.CountryCode{plaid.COUNTRYCODE_US}
+		institutionRequest := plaid.NewInstitutionsGetByIdRequest(accountsResponse.Item.GetInstitutionId(), cc)
+		iResp, _, err := handler.plaidApi.GetInstitutionById(ctx, institutionRequest)
+		if err != nil {
+			log.Printf("Unable to retrieve institution details \n%s\n", err)
+			return err
+		}
+		institution := iResp.Institution
+		url := institution.GetUrl()
+		pc := institution.GetPrimaryColor()
+		l := institution.GetLogo()
+
+		ai.InstitutionId = &institution.InstitutionId
+		ai.InstitutionName = &institution.Name
+		ai.Url = &url
+		ai.PrimaryColor = &pc
+		ai.Logo = &l
+	}
+
+	_, err = handler.accountRepository.InsertNewAccounts(&ai)
+	if err != nil {
+		log.Printf("Unable to save account details \n%s\n", err)
+		return err
+	}
+
+	err = emitAccountUpdates(handler.rabbitConnection, &ai, &token, &privateToken)
 	if err != nil {
 		log.Printf("Unable to send all account updates \n%s\n", err)
 		return err
