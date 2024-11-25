@@ -30,9 +30,6 @@ func convertAccountResponseToAccountList(
 
 func convertAccountBaseToAccount(accountBase plaid.AccountBase) Account {
 
-	at := string(accountBase.GetType())
-	st := string(accountBase.GetSubtype())
-
 	account := Account{}
 	account.PlaidAccountId = &accountBase.AccountId
 	account.Name = &accountBase.Name
@@ -41,10 +38,16 @@ func convertAccountBaseToAccount(accountBase plaid.AccountBase) Account {
 	account.AvailableBalance = accountBase.Balances.Available.Get()
 	account.CurrentBalance = accountBase.Balances.Current.Get()
 	account.Limit = accountBase.Balances.Limit.Get()
+	account.OfficialCurrencyCode = accountBase.Balances.IsoCurrencyCode.Get()
+	account.UnofficialCurrencyCode = accountBase.Balances.UnofficialCurrencyCode.Get()
+
+	at := string(accountBase.GetType())
 	account.AccountTypeName = &at
-	if st == "" {
+
+	if accountBase.Subtype.Get() == nil {
 		account.AccountSubTypeName = nil
 	} else {
+		st := string(accountBase.GetSubtype())
 		account.AccountSubTypeName = &st
 	}
 

@@ -94,7 +94,7 @@ func (handler *AccountReceiver) HandleAccountUpdateEvent(msg *amqp091.Delivery) 
 		}
 	}
 
-	log.Printf("Found accounts. Emitting to Account Update Queue. \n%+v\n", accountsResponse)
+	log.Printf("Found accounts. Converting to Account Item. \n%+v\n", accountsResponse)
 	accounts := convertAccountResponseToAccountList(
 		&accountsResponse,
 		privateToken.ItemId,
@@ -102,13 +102,19 @@ func (handler *AccountReceiver) HandleAccountUpdateEvent(msg *amqp091.Delivery) 
 		privateToken.IsNew)
 
 	ai := AccountItem{
-		ItemId:   privateToken.ItemId,
-		TenantId: privateToken.UserId,
-		Cursor:   privateToken.Cursor,
-		Accounts: accounts,
+		ItemId:        privateToken.ItemId,
+		TenantId:      privateToken.UserId,
+		Cursor:        privateToken.Cursor,
+		InstitutionId: accountsResponse.Item.InstitutionId.Get(),
+		Accounts:      accounts,
 	}
 
-	if accountsResponse.Item.GetInstitutionId() != "" {
+	if val, ok := accountsResponse.Item.AdditionalProperties["institution_name"]; ok {
+		ins := val.(string)
+		ai.InstitutionName = &ins
+	}
+
+	if accountsResponse.Item.InstitutionId.Get() != nil {
 		cc := []plaid.CountryCode{plaid.COUNTRYCODE_US}
 		institutionRequest := plaid.NewInstitutionsGetByIdRequest(accountsResponse.Item.GetInstitutionId(), cc)
 		iResp, _, err := handler.plaidApi.GetInstitutionById(ctx, institutionRequest)
@@ -134,6 +140,7 @@ func (handler *AccountReceiver) HandleAccountUpdateEvent(msg *amqp091.Delivery) 
 		return err
 	}
 
+	log.Printf("Saved accounts. Emitting to Account Update Queue. \n%+v\n", ai)
 	err = emitAccountUpdates(handler.rabbitConnection, &ai, &token, &privateToken)
 	if err != nil {
 		log.Printf("Unable to send all account updates \n%s\n", err)
