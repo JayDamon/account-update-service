@@ -23,7 +23,6 @@ func TestEmitAccountUpdates_SuccessPath(t *testing.T) {
 	tenantId := "tenantId"
 	isNew := true
 	plaidToken := "privateToken"
-	cursor := "testCursor"
 
 	privateToken := &users.PrivateToken{
 		ItemId:       &itemId,
@@ -32,7 +31,15 @@ func TestEmitAccountUpdates_SuccessPath(t *testing.T) {
 		IsNew:        &isNew,
 	}
 
-	err := emitAccountUpdates(conn, accountsGetResponse, &cursor, &token, privateToken)
+	aa := convertAccountResponseToAccountList(accountsGetResponse, &itemId, &tenantId, &isNew)
+
+	ais := AccountItem{
+		ItemId:   &itemId,
+		TenantId: &tenantId,
+		Accounts: aa,
+	}
+
+	err := emitAccountUpdates(conn, &ais, &token, privateToken)
 
 	assert.Nil(t, err)
 
@@ -42,16 +49,14 @@ func TestEmitAccountUpdates_SuccessPath(t *testing.T) {
 	assert.Equal(t, "account_update", conn.exchange)
 	assert.Equal(t, "application/json", conn.contentType)
 
-	ai, ok := conn.body.(AccountItem)
+	ai, ok := conn.body.(*AccountItem)
 	assert.True(t, ok)
 	assert.Equal(t, "itemId", *ai.ItemId)
-	assert.Equal(t, "testCursor", *ai.Cursor)
 	assert.Equal(t, 2, len(*ai.Accounts))
 
 	var accountsChecked int
 	for _, a := range *ai.Accounts {
 
-		assert.Equal(t, "accountId", *a.AccountId)
 		assert.Equal(t, "itemId", *a.ItemId)
 		assert.Equal(t, true, *a.IsNew)
 
@@ -72,7 +77,6 @@ func TestEmitAccountUpdates_SendMessageFails(t *testing.T) {
 	tenantId := "tenantId"
 	isNew := false
 	plaidToken := "privateToken"
-	cursor := "testCursor"
 
 	privateToken := &users.PrivateToken{
 		ItemId:       &itemId,
@@ -81,13 +85,21 @@ func TestEmitAccountUpdates_SendMessageFails(t *testing.T) {
 		IsNew:        &isNew,
 	}
 
-	err := emitAccountUpdates(conn, accountsGetResponse, &cursor, &token, privateToken)
+	aa := convertAccountResponseToAccountList(accountsGetResponse, &itemId, &tenantId, &isNew)
+
+	ais := AccountItem{
+		ItemId:   &itemId,
+		TenantId: &tenantId,
+		Accounts: aa,
+	}
+
+	err := emitAccountUpdates(conn, &ais, &token, privateToken)
 	assert.NotNil(t, err)
 	assert.Equal(t, "failed to send messages failing for 1 test\n", err.Error())
 
 	assert.Equal(t, 1, conn.sendMessageCount)
 
-	ai, ok := conn.body.(AccountItem)
+	ai, ok := conn.body.(*AccountItem)
 	assert.True(t, ok)
 	assert.Equal(t, "itemId", *ai.ItemId)
 	assert.Equal(t, 2, len(*ai.Accounts))
@@ -95,7 +107,6 @@ func TestEmitAccountUpdates_SendMessageFails(t *testing.T) {
 	var accountsChecked int
 	for _, a := range *ai.Accounts {
 
-		assert.Equal(t, "accountId", *a.AccountId)
 		assert.Equal(t, "itemId", *a.ItemId)
 
 		accountsChecked++
@@ -104,9 +115,9 @@ func TestEmitAccountUpdates_SendMessageFails(t *testing.T) {
 	assert.Equal(t, 2, accountsChecked)
 }
 
-func createTestHandler(conn *TestConnector, middleware *TestMiddleware, plaidHandler *TestApiService) Handler {
+func createTestHandler(conn *TestConnector, middleware *TestMiddleware, plaidHandler *TestApiService, testRepository *TestRepository) Receiver {
 
-	handler := NewHandler(conn, middleware, plaidHandler)
+	handler := NewReceiver(testRepository, conn, middleware, plaidHandler)
 
 	return handler
 }
@@ -166,5 +177,10 @@ func (api *TestApiService) GetAccountsForItem(ctx context.Context, accountsGetRe
 
 func (api *TestApiService) GetAccountBalancesForItem(ctx context.Context, accountBalancesGetReq *plaid.AccountsBalanceGetRequest) (plaid.AccountsGetResponse, *http.Response, error) {
 	response := plaid.AccountsGetResponse{}
+	return response, nil, nil
+}
+
+func (api *TestApiService) GetInstitutionById(ctx context.Context, institutionRequest *plaid.InstitutionsGetByIdRequest) (plaid.InstitutionsGetByIdResponse, *http.Response, error) {
+	response := plaid.InstitutionsGetByIdResponse{}
 	return response, nil, nil
 }

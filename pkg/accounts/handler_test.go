@@ -15,13 +15,15 @@ func TestHandleAccountRefreshEvent_SuccessPath(t *testing.T) {
 	mid := &TestMiddleware{}
 	mid.extractUserIdFromTokenReturn = "userId"
 	plaidHandler := &TestApiService{}
+	testRepository := &TestRepository{}
 	//plaidHandler.response = createTestAccountsGetResponse()
-	handler := createTestHandler(conn, mid, plaidHandler)
+	handler := createTestHandler(conn, mid, plaidHandler, testRepository)
 
 	msg := createTestMessage()
 
-	handler.HandleAccountUpdateEvent(msg)
+	err := handler.HandleAccountUpdateEvent(msg)
 
+	assert.Nil(t, err)
 	assert.Equal(t, 1, mid.authorizeMessagesCount)
 	assert.Equal(t, 0, mid.authorizeHttpRequestCount)
 	assert.Equal(t, 1, mid.extractUserIdFromTokenCount)
@@ -98,4 +100,19 @@ func (handler *TestPlaidHandler) GetAccountsForItem(privateToken string) (*plaid
 	handler.getAccountsForItemCount++
 	handler.privateToken = privateToken
 	return handler.response, nil
+}
+
+type TestRepository struct {
+}
+
+func (r *TestRepository) GetAccountsForUser(tenantId string) (*[]Account, error) {
+	return nil, nil
+}
+
+func (r *TestRepository) InsertNewAccounts(ai *AccountItem) (*AccountItem, error) {
+	return nil, nil
+}
+
+func (r *TestRepository) UpdateTransactionName(a *Account) (*Account, error) {
+	return nil, nil
 }

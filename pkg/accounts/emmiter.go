@@ -4,28 +4,10 @@ import (
 	"fmt"
 	"github.com/factotum/moneymaker/account-update-service/pkg/users"
 	"github.com/jaydamon/moneymakerrabbit"
-	"github.com/plaid/plaid-go/plaid"
 	"log"
 )
 
-func emitAccountUpdates(
-	rabbitConnection moneymakerrabbit.Connector,
-	accountUpdates *plaid.AccountsGetResponse,
-	cursor *string,
-	bearerToken *string,
-	privateToken *users.PrivateToken) error {
-
-	accounts := convertAccountResponseToAccountList(
-		accountUpdates,
-		privateToken.ItemId,
-		privateToken.UserId,
-		privateToken.IsNew)
-
-	ai := AccountItem{
-		ItemId:   privateToken.ItemId,
-		Cursor:   cursor,
-		Accounts: accounts,
-	}
+func emitAccountUpdates(rabbitConnection moneymakerrabbit.Connector, ai *AccountItem, bearerToken *string, privateToken *users.PrivateToken) error {
 
 	headers := make(map[string]interface{})
 	headers["Authorization"] = *bearerToken

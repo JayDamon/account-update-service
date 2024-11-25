@@ -1,31 +1,36 @@
 package accounts
 
-import "github.com/plaid/plaid-go/plaid"
-
 type Account struct {
-	TenantId         *string               `json:"tenantId"`
-	Name             *string               `json:"name"`
-	AccountId        *string               `json:"id"`
-	ItemId           *string               `json:"itemId"`
-	OfficialName     *string               `json:"officialName"`
-	AvailableBalance *float32              `json:"availableBalance"`
-	CurrentBalance   *float32              `json:"currentBalance"`
-	Limit            *float32              `json:"limit,omitempty"`
-	AccountType      *plaid.AccountType    `json:"accountType"`
-	AccountSubType   *plaid.AccountSubtype `json:"accountSubType"`
-	IsNew            *bool                 `json:"isNew"`
+	Id                     *string  `json:"accountId,omitempty"`
+	TenantId               *string  `json:"tenantId"`
+	FriendlyName           *string  `json:"friendlyName,omitempty"`
+	Name                   *string  `json:"name"`
+	PlaidAccountId         *string  `json:"plaidAccountId,omitempty"`
+	Mask                   *string  `json:"mask,omitempty"`
+	ItemId                 *string  `json:"itemId,omitempty"`
+	OfficialName           *string  `json:"officialName,omitempty"`
+	AvailableBalance       *float32 `json:"availableBalance,omitempty"`
+	CurrentBalance         *float32 `json:"currentBalance,omitempty"`
+	Limit                  *float32 `json:"limit,omitempty"`
+	OfficialCurrencyCode   *string  `json:"officialCurrencyCode,omitempty"`
+	UnofficialCurrencyCode *string  `json:"unofficialCurrencyCode,omitempty"`
+	IsPrimaryAccount       *bool    `json:"isPrimaryAccount,omitempty"`
+	IsInCashFlow           *bool    `json:"isInCashFlow,omitempty"`
+	AccountTypeName        *string  `json:"accountType,omitempty"`
+	AccountSubTypeName     *string  `json:"accountSubType,omitempty"`
+	InstitutionId          *string  `json:"institutionId,omitempty"`
+	InstitutionName        *string  `json:"institutionName,omitempty"`
+	IsNew                  *bool    `json:"isNew,omitempty"`
 }
 
 type AccountItem struct {
-	ItemId   *string    `json:"itemId"`
-	Cursor   *string    `json:"cursor"`
-	Accounts *[]Account `json:"accounts"`
+	ItemId          *string    `json:"itemId"`
+	Cursor          *string    `json:"cursor,omitempty"`
+	InstitutionId   *string    `json:"institutionId,omitempty"`
+	InstitutionName *string    `json:"institutionName,omitempty"`
+	Url             *string    `json:"url,omitempty"`
+	PrimaryColor    *string    `json:"primaryColor,omitempty"`
+	Logo            *string    `json:"logo,omitempty"`
+	TenantId        *string    `json:"tenantId"`
+	Accounts        *[]Account `json:"accounts,omitempty"`
 }
-
-//type Balances struct {
-//	Available *float32 `json:"available"`
-//	Current *float32 `json:"current"`
-//	Limit *float32 `json:"limit"`
-//	IsoCurrencyCode *string `json:"iso_currency_code"`
-//	UnofficialCurrencyCode *string `json:"unofficial_currency_code"`
-//}
